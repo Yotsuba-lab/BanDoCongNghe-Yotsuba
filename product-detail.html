@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title id="pageTitle">Chi tiết sản phẩm - Yotsuba-Gear</title>
+  <link rel="stylesheet" href="styte/base.css" />
+  <link rel="stylesheet" href="styte/grid.css" />
+  <link rel="stylesheet" href="styte/main.css" />
+  <link rel="stylesheet" href="styte/store.css" />
+  <link rel="stylesheet" href="styte/product.css" />
+  <link rel="stylesheet" href="styte/cart-detail.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    /* ====== MODAL OVERLAY ====== */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.55); z-index: 999;
+      align-items: center; justify-content: center;
+      backdrop-filter: blur(3px);
+    }
+    .modal-overlay.show { display: flex; }
+
+    /* ====== LOGIN MODAL ====== */
+    .login-modal {
+      background: #fff; border-radius: 16px;
+      width: 420px; max-width: 96vw;
+      padding: 36px 32px; position: relative;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      animation: slideUp 0.25s ease;
+    }
+    .login-modal .close-btn {
+      position: absolute; top: 14px; right: 16px;
+      background: none; border: none; font-size: 22px;
+      color: #aaa; cursor: pointer; transition: color 0.2s;
+    }
+    .login-modal .close-btn:hover { color: #333; }
+    .login-modal .logo-text {
+      text-align: center; font-size: 26px; font-weight: 900;
+      color: var(--primary); letter-spacing: -1px; margin-bottom: 4px;
+    }
+    .login-modal .logo-text span { color: var(--accent); }
+    .login-modal .subtitle {
+      text-align: center; font-size: 13px; color: #888; margin-bottom: 24px;
+    }
+    .tab-switch {
+      display: flex; border-radius: 8px; overflow: hidden;
+      border: 1.5px solid var(--border); margin-bottom: 22px;
+    }
+    .tab-switch button {
+      flex: 1; padding: 10px; background: none;
+      font-size: 14px; font-weight: 600; color: #888;
+      border: none; cursor: pointer; transition: all 0.2s;
+    }
+    .tab-switch button.active { background: var(--primary); color: #fff; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; color: #555; }
+    .form-group input {
+      width: 100%; padding: 10px 14px;
+      border: 1.5px solid var(--border); border-radius: 8px;
+      font-size: 14px; font-family: inherit; transition: border-color 0.2s;
+    }
+    .form-group input:focus { border-color: var(--primary); }
+    .btn-submit {
+      width: 100%; padding: 12px;
+      background: var(--primary); color: #fff;
+      border: none; border-radius: 8px;
+      font-size: 15px; font-weight: 700;
+      cursor: pointer; margin-top: 6px;
+      transition: background 0.2s;
+    }
+    .btn-submit:hover { background: var(--primary-dark); }
+    .form-tab { display: none; }
+    .form-tab.active { display: block; }
+
+    /* ====== CART MODAL ====== */
+    .cart-modal {
+      background: #fff; border-radius: 16px;
+      width: 600px; max-width: 96vw;
+      max-height: 85vh; overflow-y: auto;
+      padding: 28px; position: relative;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      animation: slideUp 0.25s ease;
+    }
+    .cart-modal h2 { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+    .cart-modal .cart-meta { font-size: 13px; color: #888; margin-bottom: 18px; }
+    .cart-empty-msg {
+      text-align: center; padding: 40px;
+      color: #bbb; font-size: 15px;
+    }
+    .cart-empty-msg i { font-size: 52px; display: block; margin-bottom: 12px; }
+    .cart-total-row {
+      display: flex; justify-content: space-between;
+      align-items: center; border-top: 2px solid var(--border);
+      padding-top: 14px; margin-top: 14px;
+    }
+    .cart-total-row .label { font-size: 15px; font-weight: 600; color: #555; }
+    .cart-total-row .amount { font-size: 22px; font-weight: 800; color: var(--primary); }
+    .btn-checkout-now {
+      display: block; width: 100%;
+      padding: 13px; background: var(--primary);
+      color: #fff; border: none; border-radius: 10px;
+      font-size: 15px; font-weight: 700;
+      margin-top: 14px; cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-checkout-now:hover { background: var(--primary-dark); }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ====== PRODUCT DETAIL STYLES ====== */
+    .product-detail {
+      background: #fff; border-radius: 16px;
+      padding: 40px; margin: 32px 0;
+      box-shadow: 0 4px 24px rgba(26,62,205,0.08);
+    }
+
+    .product-layout {
+      display: grid;
+      grid-template-columns: minmax(360px, 1.35fr) minmax(300px, 0.85fr);
+      gap: 40px; align-items: start;
+    }
+
+    .product-images {
+      position: sticky; top: 20px;
+    }
+
+    .main-image {
+      width: 100%; min-height: 420px;
+      background: #f6f8fc; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden; margin-bottom: 16px;
+      border: 2px solid #e8ecf5;
+    }
+
+    .main-image img {
+      max-width: 100%; max-height: 100%;
+      object-fit: contain;
+    }
+
+    .image-placeholder {
+      width: 100%; height: 100%;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      color: #ccc; gap: 12px;
+    }
+
+    .image-placeholder i { font-size: 64px; }
+    .image-placeholder span { font-size: 16px; font-weight: 600; }
+
+    .thumbnail-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+    }
+
+    .thumbnail {
+      width: 100%; height: 80px;
+      background: #f6f8fc; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .thumbnail:hover { border-color: var(--primary); }
+    .thumbnail.active { border-color: var(--primary); }
+
+    .thumbnail img {
+      max-width: 100%; max-height: 100%;
+      object-fit: contain;
+    }
+
+    .product-info h1 {
+      font-size: 32px; font-weight: 900;
+      color: #1a1a2e; margin-bottom: 8px;
+      line-height: 1.2;
+    }
+
+    .product-brand {
+      font-size: 14px; font-weight: 700;
+      text-transform: uppercase; color: #999;
+      letter-spacing: 1px; margin-bottom: 16px;
+    }
+
+    .product-prices {
+      display: flex; align-items: baseline;
+      gap: 16px; margin-bottom: 20px;
+    }
+
+    .price-current {
+      font-size: 28px; font-weight: 900;
+      color: var(--primary);
+    }
+
+    .price-old {
+      font-size: 18px; color: #bbb;
+      text-decoration: line-through;
+    }
+
+    .price-discount {
+      background: #e53935; color: #fff;
+      font-size: 12px; font-weight: 700;
+      padding: 4px 8px; border-radius: 12px;
+    }
+
+    .product-description {
+      margin: 24px 0;
+      line-height: 1.6; color: #555;
+      font-size: 15px;
+    }
+
+    .product-actions {
+      display: flex; gap: 16px;
+      margin-top: 32px;
+    }
+
+    .btn-add-cart {
+      flex: 1; padding: 16px 24px;
+      background: var(--primary); color: #fff;
+      border: none; border-radius: 12px;
+      font-size: 16px; font-weight: 700;
+      cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+
+    .btn-add-cart:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(26,62,205,0.3);
+    }
+
+    .btn-buy-now {
+      flex: 1; padding: 16px 24px;
+      background: #28a745; color: #fff;
+      border: none; border-radius: 12px;
+      font-size: 16px; font-weight: 700;
+      cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+
+    .btn-buy-now:hover {
+      background: #218838;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(40,167,69,0.3);
+    }
+
+    .product-specs {
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid #e8ecf5;
+    }
+
+    .specs-title {
+      font-size: 18px; font-weight: 800;
+      margin-bottom: 16px; color: #1a1a2e;
+    }
+
+    .specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .spec-item {
+      display: flex; justify-content: space-between;
+      padding: 8px 0; border-bottom: 1px solid #f0f0f0;
+    }
+
+    .spec-label {
+      font-weight: 600; color: #555;
+    }
+
+    .spec-value {
+      color: #333; text-align: right;
+    }
+
+    /* ====== BACK TO PRODUCTS ====== */
+    .back-link {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 20px; background: #fff;
+      border: 1.5px solid #e8ecf5; border-radius: 8px;
+      text-decoration: none; color: #333; font-weight: 600;
+      margin-bottom: 24px; transition: all 0.2s;
+    }
+    .back-link:hover {
+      border-color: var(--primary); color: var(--primary);
+      transform: translateX(-4px);
+    }
+
+    /* ====== FOOTER ====== */
+    .footer {
+      background: #fff; border-top: 2px solid #e8ecf5;
+      margin-top: 32px; padding: 32px 0 0;
+    }
+    .footer-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 32px; margin-bottom: 24px;
+    }
+    .footer-info h3 { font-size: 17px; font-weight: 800; margin-bottom: 16px; color: var(--primary); }
+    .fi-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; font-size: 13.5px; color: #555; }
+    .fi-row i { color: var(--primary); margin-top: 2px; }
+    .footer-map { border-radius: 10px; overflow: hidden; height: 190px; background: #e8ecf5; }
+    .footer-map iframe { width: 100%; height: 100%; border: 0; }
+    .footer-bottom { border-top: 1px solid #e8ecf5; padding: 14px 0; text-align: center; font-size: 12px; color: #aaa; }
+
+    /* ====== TOAST ====== */
+    .toast {
+      position: fixed; bottom: 28px; right: 28px;
+      background: #1a3ecd; color: #fff;
+      padding: 12px 22px; border-radius: 10px;
+      font-size: 14px; font-weight: 600;
+      box-shadow: 0 6px 24px rgba(26,62,205,0.3);
+      z-index: 9999; display: none;
+      animation: slideUp 0.3s ease;
+    }
+    .toast.show { display: block; }
+    .toast i { margin-right: 8px; }
+
+    /* misc */
+    .section-wrap { padding: 16px 0; }
+    .navbar { background: #fff; border-bottom: 1px solid #e8ecf5; }
+    .nav-inner { display: flex; }
+    .nav-it {
+      display: flex; align-items: center; gap: 6px;
+      padding: 12px 18px; font-size: 13.5px; font-weight: 500;
+      border-right: 1px solid #e8ecf5; color: #333;
+      transition: all 0.2s; white-space: nowrap;
+    }
+    .nav-it:hover { color: var(--primary); background: #f0f4ff; }
+    .nav-it i { font-size: 15px; color: var(--primary); }
+    .nav-it .hot { color: #e53935; font-weight: 800; }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     HEADER
+============================================================ -->
+<header class="header">
+  <div class="container">
+    <div style="display:flex;align-items:center;gap:16px;">
+
+      <!-- Logo -->
+      <a href="index.html" class="logo" style="font-size:24px;font-weight:900;color:#fff;text-decoration:none;">
+        <i class="fa fa-clover" style="color:#00d084;"></i> <span style="color:#ff8c00;">Yotsuba-Gear</span>
+      </a>
+
+      <!-- Search -->
+      <div class="search-bar" style="flex:1">
+        <input type="text" id="searchInput" placeholder="Bạn cần tìm gì?" />
+        <button onclick="doSearch()"><i class="fa fa-search"></i></button>
+      </div>
+
+      <!-- Actions -->
+      <div style="display:flex;align-items:center;gap:20px;">
+        <!-- Hotline -->
+        <div style="display:flex;align-items:center;gap:8px;color:#fff;">
+          <i class="fa fa-phone-alt" style="font-size:20px;"></i>
+          <div style="font-size:12px;line-height:1.3;">
+            Hotline<br><strong>0936507178</strong>
+          </div>
+        </div>
+        <!-- Tra cứu -->
+        <div style="display:flex;align-items:center;gap:8px;color:#fff;cursor:pointer;">
+          <i class="fa fa-file-alt" style="font-size:20px;"></i>
+          <div style="font-size:12px;line-height:1.3;">
+            Tra cứu<br><strong>Đơn hàng</strong>
+          </div>
+        </div>
+        <!-- Giỏ hàng -->
+        <div style="position:relative;cursor:pointer;color:#fff;" onclick="openCart()">
+          <i class="fa fa-shopping-cart" style="font-size:22px;"></i>
+          <span id="cartBadge" style="position:absolute;top:-8px;right:-8px;background:#ffc107;color:#111;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;">0</span>
+          <div style="font-size:12px;line-height:1.3;margin-left:4px;display:inline-block;vertical-align:middle;">
+            Giỏ hàng
+          </div>
+        </div>
+        <!-- Đăng nhập -->
+        <button class="btn-login" onclick="openLogin()">
+          <i class="fa fa-user"></i> Đăng nhập
+        </button>
+      </div>
+
+    </div>
+  </div>
+</header>
+
+<!-- ============================================================
+     NAVBAR
+============================================================ -->
+<nav class="navbar">
+  <div class="container">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-it"><i class="fa fa-home"></i> Trang chủ</a>
+      <a href="products.html" class="nav-it"><i class="fa fa-list"></i> Tất cả sản phẩm</a>
+      <a href="#" class="nav-it"><i class="fa fa-desktop"></i> PC</a>
+      <a href="#" class="nav-it"><i class="fa fa-fire hot"></i> <span class="hot">Hot Deal</span> | Laptop</a>
+      <a href="#" class="nav-it"><i class="fa fa-newspaper"></i> Tin tức</a>
+      <a href="lab-practice.html" class="nav-it"><i class="fa fa-flask"></i> Lab thực hành</a>
+      <a href="#" class="nav-it"><i class="fa fa-exchange-alt"></i> Thu cũ đổi mới</a>
+      <a href="#" class="nav-it"><i class="fa fa-shield-alt"></i> Tra cứu bảo hành</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ============================================================
+     MAIN CONTENT
+============================================================ -->
+<main style="padding:16px 0 32px;">
+  <div class="container">
+
+    <!-- Back to Products -->
+    <a href="javascript:history.back()" class="back-link">
+      <i class="fa fa-arrow-left"></i> Quay lại
+    </a>
+
+    <!-- Product Detail -->
+    <div class="product-detail" id="productDetail">
+      <!-- Product content will be rendered here -->
+    </div>
+
+  </div><!-- /container -->
+</main>
+
+<!-- ============================================================
+     FOOTER
+============================================================ -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-info">
+        <h3><i class="fa fa-clover" style="color:#00d084;"></i> <span style="color:#ff8c00;">Yotsuba-Gear</span></h3>
+        <div class="fi-row"><i class="fa fa-map-marker-alt"></i> 180 Cao Lỗ, Phường 4, Quận 8, TP Hồ Chí Minh</div>
+        <div class="fi-row"><i class="fa fa-envelope"></i> DH52302458@student.stu.edu.vn</div>
+        <div class="fi-row"><i class="fa fa-phone"></i> 0936507178</div>
+        <div class="fi-row"><i class="fa fa-clock"></i> Thứ 2 – Chủ nhật: 8:00 – 21:00</div>
+      </div>
+      <div>
+        <div class="footer-map">
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.8!2d106.682!3d10.742!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTDCsDQ0JzMxLjIiTiAxMDbCsDQwJzU1LjIiRQ!5e0!3m2!1svi!2s!4v1"
+            allowfullscreen="" loading="lazy">
+          </iframe>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2025 Yotsuba-Gear. Bảo lưu mọi quyền. | Điều khoản | Bảo mật</div>
+  </div>
+</footer>
+
+<!-- ============================================================
+     MODALS
+============================================================ -->
+
+<!-- Login Modal -->
+<div class="modal-overlay" id="loginOverlay" onclick="closeIfOverlay(event,'loginOverlay')">
+  <div class="login-modal">
+    <button class="close-btn" onclick="closeLogin()"><i class="fa fa-times"></i></button>
+    <div class="login-modal logo-text">Yotsuba<span>-Gear</span></div>
+    <div class="subtitle">Chào mừng bạn đến với Yotsuba-Gear!</div>
+    <div class="tab-switch">
+      <button id="tabLogin" class="active" onclick="switchTab('login')">Đăng nhập</button>
+      <button id="tabRegister" onclick="switchTab('register')">Đăng ký</button>
+    </div>
+
+    <div class="form-tab active" id="formLogin">
+      <div class="form-group">
+        <label>Email hoặc Số điện thoại</label>
+        <input type="text" placeholder="Nhập email / số điện thoại" />
+      </div>
+      <div class="form-group">
+        <label>Mật khẩu</label>
+        <input type="password" placeholder="Nhập mật khẩu" />
+      </div>
+      <div style="text-align:right;margin-bottom:6px;">
+        <a href="#" style="font-size:12px;color:var(--primary);">Quên mật khẩu?</a>
+      </div>
+      <button class="btn-submit" onclick="fakeLogin()">Đăng nhập</button>
+    </div>
+
+    <div class="form-tab" id="formRegister">
+      <div class="form-group">
+        <label>Họ và tên</label>
+        <input type="text" placeholder="Nhập họ và tên" />
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" placeholder="Nhập email" />
+      </div>
+      <div class="form-group">
+        <label>Số điện thoại</label>
+        <input type="tel" placeholder="Nhập số điện thoại" />
+      </div>
+      <div class="form-group">
+        <label>Mật khẩu</label>
+        <input type="password" placeholder="Tạo mật khẩu" />
+      </div>
+      <button class="btn-submit" onclick="fakeRegister()">Đăng ký ngay</button>
+    </div>
+  </div>
+</div>
+
+<!-- Cart Modal -->
+<div class="modal-overlay" id="cartOverlay" onclick="closeIfOverlay(event,'cartOverlay')">
+  <div class="cart-modal">
+    <button class="close-btn" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:22px;color:#aaa;cursor:pointer;" onclick="closeCart()">
+      <i class="fa fa-times"></i>
+    </button>
+    <h2>🛒 Giỏ hàng</h2>
+    <div class="cart-meta" id="cartMeta">Bạn đang có <strong>0</strong> sản phẩm</div>
+    <div id="cartItems"></div>
+    <div id="cartSummary"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"><i class="fa fa-check-circle"></i><span id="toastMsg"></span></div>
+
+<!-- ============================================================
+     JAVASCRIPT
+============================================================ -->
+<script>
+/* ===== DATA SẢN PHẨM ===== */
+const laptops = [
+  { id:1, category:"laptop", brand:"ACER", name:"Laptop Gaming Acer Nitro Lite 16 NL16 71G 56WQ", price:25490000, oldPrice:26790000, discount:"-5%",
+    img:"image/gearvn-laptop-gaming-acer-nitro-lite-nl16-71g-71fn-1_cebbe117071d42b99f05427cebf47687.png",
+    description: "Laptop gaming Acer Nitro 5 với cấu hình mạnh mẽ, màn hình 16 inch Full HD, card đồ họa RTX 4050, RAM 16GB DDR5 và SSD 512GB. Hoàn hảo cho gaming và công việc sáng tạo.",
+    specs: { cpu: "Intel Core i7-13620H", ram: "16GB DDR5", storage: "512GB SSD", gpu: "RTX 4050 6GB", display: "16\" FHD 165Hz", os: "Windows 11" }
+  },
+  { id:2, category:"laptop", brand:"LENOVO", name:"Laptop Gaming Lenovo Legion 5 15IRX10 83LY004GVN", price:52990000, oldPrice:54990000, discount:"-4%",
+    img:"image/250_52776_laptop_lenovo_legion_pro_5_16iax10_83f3002gvn__5_.jpg",
+    description: "Lenovo Legion 5 Pro với màn hình 16 inch QHD+ 165Hz, AMD Ryzen 9 7945HX, RTX 4070, RAM 32GB DDR5 và SSD 1TB. Trải nghiệm gaming đỉnh cao với thiết kế gaming chuyên nghiệp.",
+    specs: { cpu: "AMD Ryzen 9 7945HX", ram: "32GB DDR5", storage: "1TB SSD", gpu: "RTX 4070 8GB", display: "16\" QHD+ 165Hz", os: "Windows 11" }
+  },
+  { id:3, category:"laptop", brand:"ACER", name:"Laptop Gaming Acer Nitro ProPanel ANV15-52-72BM", price:34990000, oldPrice:38990000, discount:"-10%",
+    img:"image/sssxs_32.webp",
+    description: "Acer Nitro 16 với màn hình 16 inch FHD 165Hz, Intel Core i7-13620H, RTX 4060, RAM 16GB DDR5 và SSD 512GB. Laptop gaming giá tốt với hiệu năng vượt trội.",
+    specs: { cpu: "Intel Core i7-13620H", ram: "16GB DDR5", storage: "512GB SSD", gpu: "RTX 4060 8GB", display: "16\" FHD 165Hz", os: "Windows 11" }
+  },
+  { id:4, category:"laptop", brand:"GIGABYTE", name:"Laptop Gaming Gigabyte A16 CMHH2VN893SH", price:27990000, oldPrice:29790000, discount:"-6%",
+    img:"image/images.jpeg",
+    description: "Gigabyte A16 với AMD Ryzen 5 7535HS, RTX 4050, RAM 16GB DDR5 và SSD 512GB. Laptop gaming giá rẻ với hiệu năng ổn định cho game thủ casual.",
+    specs: { cpu: "AMD Ryzen 5 7535HS", ram: "16GB DDR5", storage: "512GB SSD", gpu: "RTX 4050 6GB", display: "16\" FHD 120Hz", os: "Windows 11" }
+  },
+];
+
+const pcs = [
+  { id:5, category:"pc", brand:"MSI", name:"PC CPS Gamming G04 i5 12400F / 8GB-256GB/ RX6500", price:13990000, oldPrice:22690000, discount:"38,34%", img:"image/pc-cps-gaming-g4-30.webp",
+    description: "PC gaming MSI với Intel Core i5-12400F, RX 6500 XT, RAM 8GB DDR4 và SSD 256GB. Phù hợp cho gaming nhẹ và công việc văn phòng.",
+    specs: { cpu: "Intel Core i5-12400F", ram: "8GB DDR4", storage: "256GB SSD", gpu: "RX 6500 XT 4GB", psu: "500W", case: "Mid Tower" }
+  },
+  { id:6, category:"pc", brand:"ASUS", name:"PC CPS X MSI Gaming Intel i5 Gen 12 Kèm màn hình", price:23990000, oldPrice:35690000, discount:"32.78%", img:"image/pc-cps-msi-gaming-intel-i5-gen-12-06.webp",
+    description: "PC gaming ASUS kèm màn hình với Intel Core i5-12400F, RTX 4060, RAM 16GB DDR4 và SSD 512GB. Bộ PC hoàn chỉnh cho gaming chất lượng.",
+    specs: { cpu: "Intel Core i5-12400F", ram: "16GB DDR4", storage: "512GB SSD", gpu: "RTX 4060 8GB", monitor: "24\" FHD 144Hz", psu: "650W" }
+  },
+  { id:7, category:"pc", brand:"CORSAIR", name:"PC CPS X MSI Gaming Intel i7 Gen 14 Kèm màn hình", price:36990000, oldPrice:51890000, discount:"-6%", img:"image/pc-cps-msi-gaming-intel-i7-gen-14-326-03.webp",
+    description: "PC gaming Corsair cao cấp với Intel Core i7-14700F, RTX 4070, RAM 32GB DDR5 và SSD 1TB. Hiệu năng đỉnh cao cho gaming 1440p.",
+    specs: { cpu: "Intel Core i7-14700F", ram: "32GB DDR5", storage: "1TB SSD", gpu: "RTX 4070 12GB", monitor: "27\" QHD 165Hz", psu: "750W" }
+  },
+  { id:8, category:"pc", brand:"LENOVO", name:"PC CPS Quantum Blaze 5070 Ti", price:67990000, oldPrice:98790000, discount:"-7%", img:"image/pc-cps-quantum-blaze-5070-ti.webp",
+    description: "PC gaming Lenovo Legion với Intel Core i9-13900K, RTX 4070 Ti, RAM 32GB DDR5 và SSD 1TB. Cấu hình tối tân cho gaming 4K.",
+    specs: { cpu: "Intel Core i9-13900K", ram: "32GB DDR5", storage: "1TB SSD", gpu: "RTX 4070 Ti 12GB", psu: "850W", cooling: "AIO 360mm" }
+  },
+];
+
+const accessories = [
+  { id:9,  category:"accessories", brand:"RAZER",   name:"Chuột Gaming Razer DeathAdder V3 Pro – Không dây 90g", price:2990000, oldPrice:3490000, discount:"-14%", img:"image/da-v3-pro-2_compressed_33943a00cbfc4949a84a77221a175b7f.jpg",
+    description: "Chuột gaming Razer DeathAdder V3 Pro không dây với cảm biến Focus Pro 30K, trọng lượng chỉ 90g, pin dùng 90 giờ. Thiết kế ergonomic cho game thủ chuyên nghiệp.",
+    specs: { sensor: "Focus Pro 30K", dpi: "30000", weight: "90g", battery: "90 giờ", connectivity: "Wireless 2.4GHz + Bluetooth", buttons: "5 programmable" }
+  },
+  { id:10, category:"accessories", brand:"CORSAIR", name:"Bàn phím Corsair K70 RGB PRO – Mechanical Cherry MX Red", price:3490000, oldPrice:3990000, discount:"-13%", img:"image/ban-phim-gaming-corsair-k70-pro-rgb-red-switch_1_.webp",
+    description: "Bàn phím gaming Corsair K70 PRO với switch Cherry MX Red, RGB per-key, aluminum frame và anti-ghosting. Hoàn hảo cho gaming và typing.",
+    specs: { switches: "Cherry MX Red", layout: "Full-size", lighting: "RGB per-key", material: "Aluminum", features: "Anti-ghosting, Media keys" }
+  },
+  { id:11, category:"accessories", brand:"LOGITECH", name:"Tai nghe Logitech G Pro X 2 Lightspeed – Wireless", price:4290000, oldPrice:4990000, discount:"-14%", img:"image/45885_logitech_g_pro_x_2_lightspeed_wireless_anphatcomputer_1.jpg",
+    description: "Tai nghe gaming Logitech G Pro X 2 với driver Graphene, kết nối Lightspeed wireless, thời lượng pin 50 giờ. Âm thanh studio quality cho esports.",
+    specs: { driver: "Graphene 50mm", frequency: "20Hz-20kHz", battery: "50 giờ", connectivity: "Lightspeed Wireless", mic: "Detachable boom", weight: "345g" }
+  },
+  { id:12, category:"accessories", brand:"SAMSUNG", name:"Màn hình Samsung Odyssey G7 32\" 240Hz WQHD Curved", price:12990000, oldPrice:14500000, discount:"-10%", img:"image/vn-curved-c32g75tqse-lc32g75tqse.webp",
+    description: "Màn hình gaming Samsung Odyssey G7 32 inch WQHD 240Hz với tấm nền VA curved, HDR1000 và G-Sync. Trải nghiệm gaming đỉnh cao với màu sắc sống động.",
+    specs: { size: "32\"", resolution: "WQHD (1440p)", refresh: "240Hz", panel: "VA Curved", features: "HDR1000, G-Sync, 1000R curvature" }
+  },
+];
+
+const vgas = [
+  { id:13, category:"vga", brand:"ASUS", name:"VGA ASUS TUF Gaming RTX 4060 Ti 8GB", price:11990000, oldPrice:13990000, discount:"-14%", img:"image/vga-asus-tuf-gaming-geforce-rtx-4060-ti-oc-edition-8gb-gddr6-tuf-rtx4060ti-o8g-gaming-d51feef2-6946-48d5-8e9e-6c8871a03ed2.webp",
+    description: "Card đồ họa ASUS TUF Gaming RTX 4060 Ti 8GB với thiết kế TUF bền bỉ, cooling hiệu quả và RGB lighting. Hoàn hảo cho gaming 1440p.",
+    specs: { gpu: "RTX 4060 Ti", vram: "8GB GDDR6", base_clock: "2310 MHz", boost_clock: "2535 MHz", ports: "HDMI 2.1, DP 1.4a", power: "160W" }
+  },
+  { id:14, category:"vga", brand:"MSI", name:"VGA MSI GAMING X RTX 4070 12GB", price:16990000, oldPrice:18990000, discount:"-10%", img:"image/25043-vg0000130.jpg",
+    description: "Card đồ họa MSI Gaming X RTX 4070 12GB với thiết kế Gaming X đẹp mắt, RGB Mystic Light và cooling TORX Fan. Hiệu năng đỉnh cao cho gaming 1440p.",
+    specs: { gpu: "RTX 4070", vram: "12GB GDDR6X", base_clock: "1920 MHz", boost_clock: "2475 MHz", ports: "HDMI 2.1, DP 1.4a", power: "200W" }
+  },
+  { id:15, category:"vga", brand:"GIGABYTE", name:"VGA Gigabyte Eagle RTX 4060 8GB", price:9900000, oldPrice:10990000, discount:"-10%", img:"image/250_57130_card_do_hoa_gigabyte_geforce_rtx_3050_windforce_oc_v2_hinh6.jpg",
+    description: "Card đồ họa Gigabyte Eagle RTX 4060 8GB với thiết kế gọn gàng, cooling hiệu quả và RGB Fusion. Giá tốt cho gaming 1080p/1440p.",
+    specs: { gpu: "RTX 4060", vram: "8GB GDDR6", base_clock: "1830 MHz", boost_clock: "2460 MHz", ports: "HDMI 2.1, DP 1.4a", power: "128W" }
+  },
+];
+
+const rams = [
+  { id:16, category:"ram", brand:"KINGSTON", name:"RAM Kingston Fury Beast 16GB (2x8GB) DDR5 5600MHz", price:2390000, oldPrice:2790000, discount:"-14%", img:"image/42819_42820_ok.jpeg",
+    description: "RAM Kingston Fury Beast DDR5 5600MHz 16GB (2x8GB) với timing CL36, voltage 1.25V và heatsink RGB. Tương thích với các mainboard DDR5.",
+    specs: { capacity: "16GB (2x8GB)", type: "DDR5", speed: "5600MHz", timing: "CL36", voltage: "1.25V", features: "RGB heatsink" }
+  },
+  { id:17, category:"ram", brand:"CORSAIR", name:"RAM Corsair Vengeance RGB 32GB (2x16GB) DDR5 6000MHz", price:5890000, oldPrice:6490000, discount:"-9%", img:"image/ram-pc-corsair-vengeance-rgb-32gb-5600mhz-ddr5-2x16gb-cmh32gx5m2b5600c40k-4-b59536a2-3f7d-4083-b544-67255cdb75d5.webp",
+    description: "RAM Corsair Vengeance RGB DDR5 6000MHz 32GB (2x16GB) với iCUE RGB lighting, timing CL30 và voltage 1.35V. Hoàn hảo cho hệ thống RGB.",
+    specs: { capacity: "32GB (2x16GB)", type: "DDR5", speed: "6000MHz", timing: "CL30", voltage: "1.35V", features: "iCUE RGB" }
+  },
+  { id:18, category:"ram", brand:"G.SKILL", name:"Ram PC G.SKILL Ripjaws S5 32GB 5600MHz DDR5", price:2290000, oldPrice:2590000, discount:"-12%", img:"image/ram-pc-g-skill-ripjaws-s5-32gb-5600mhz-ddr5-16gbx2-f5-5600j4040c16gx2-rs5w.webp",
+    description: "RAM G.SKILL Ripjaws S5 DDR5 5600MHz 32GB với timing CL36, voltage 1.25V và heatsink thiết kế đẹp. Giá tốt cho upgrade DDR5.",
+    specs: { capacity: "32GB (2x16GB)", type: "DDR5", speed: "5600MHz", timing: "CL36", voltage: "1.25V", features: "Aluminum heatsink" }
+  },
+];
+
+/* ===== COMBINED ALL PRODUCTS ===== */
+const allProducts = [...laptops, ...pcs, ...accessories, ...vgas, ...rams];
+
+/* ===== GIỎ HÀNG ===== */
+let cart = JSON.parse(localStorage.getItem('tz_cart') || '[]');
+
+function saveCart() { localStorage.setItem('tz_cart', JSON.stringify(cart)); }
+
+function addToCart(product) {
+  const existing = cart.find(i => i.id === product.id);
+  if (existing) { existing.qty += 1; }
+  else { cart.push({ ...product, qty: 1 }); }
+  saveCart();
+  updateCartBadge();
+  showToast(`Đã thêm "${product.name.substring(0,30)}..." vào giỏ hàng!`);
+}
+
+function removeFromCart(id) {
+  cart = cart.filter(i => i.id !== id);
+  saveCart();
+  updateCartBadge();
+  renderCartModal();
+}
+
+function updateCartBadge() {
+  const total = cart.reduce((s, i) => s + i.qty, 0);
+  document.getElementById('cartBadge').textContent = total;
+}
+
+function formatPrice(n) {
+  return n.toLocaleString('vi-VN') + 'đ';
+}
+
+/* ===== PRODUCT DETAIL FUNCTIONS ===== */
+function getProductById(id) {
+  return allProducts.find(p => p.id === parseInt(id));
+}
+
+function renderProductDetail(product) {
+  if (!product) {
+    document.getElementById('productDetail').innerHTML = '<p>Sản phẩm không tồn tại!</p>';
+    return;
+  }
+
+  // Update page title
+  document.getElementById('pageTitle').textContent = `${product.name} - Yotsuba-Gear`;
+
+  // Render main image
+  const mainImageHtml = product.img
+    ? `<img src="${product.img}" alt="${product.name}" />`
+    : `<div class="image-placeholder"><i class="fa fa-image"></i><span>${product.brand}</span></div>`;
+
+  // Render thumbnails (using same image for now, can be extended)
+  const thumbnails = [product.img, product.img, product.img, product.img].map((img, index) =>
+    `<div class="thumbnail ${index === 0 ? 'active' : ''}" onclick="changeMainImage(${index})">
+      ${img ? `<img src="${img}" alt="Thumbnail ${index + 1}" />` : `<i class="fa fa-image"></i>`}
+    </div>`
+  ).join('');
+
+  // Render specs
+  const specsHtml = product.specs ? Object.entries(product.specs).map(([key, value]) =>
+    `<div class="spec-item">
+      <span class="spec-label">${key.toUpperCase()}:</span>
+      <span class="spec-value">${value}</span>
+    </div>`
+  ).join('') : '';
+
+  const html = `
+    <div class="product-layout">
+      <div class="product-images">
+        <div class="main-image" id="mainImage">
+          ${mainImageHtml}
+        </div>
+        <div class="thumbnail-grid">
+          ${thumbnails}
+        </div>
+      </div>
+
+      <div class="product-info">
+        <div class="product-brand">${product.brand}</div>
+        <h1>${product.name}</h1>
+
+        <div class="product-prices">
+          <span class="price-current">${formatPrice(product.price)}</span>
+          ${product.oldPrice ? `<span class="price-old">${formatPrice(product.oldPrice)}</span>` : ''}
+          ${product.discount ? `<span class="price-discount">${product.discount}</span>` : ''}
+        </div>
+
+        <div class="product-description">
+          ${product.description || 'Thông tin chi tiết sản phẩm sẽ được cập nhật sớm.'}
+        </div>
+
+        <div class="product-actions">
+          <button class="btn-add-cart" onclick="addToCart(${JSON.stringify(product).replace(/"/g,"'")})">
+            <i class="fa fa-shopping-cart"></i> Thêm vào giỏ hàng
+          </button>
+          <button class="btn-buy-now" onclick="buyNow(${JSON.stringify(product).replace(/"/g,"'")})">
+            <i class="fa fa-bolt"></i> Mua ngay
+          </button>
+        </div>
+
+        ${specsHtml ? `
+        <div class="product-specs">
+          <h3 class="specs-title">Thông số kỹ thuật</h3>
+          <div class="specs-grid">
+            ${specsHtml}
+          </div>
+        </div>
+        ` : ''}
+      </div>
+    </div>
+  `;
+
+  document.getElementById('productDetail').innerHTML = html;
+}
+
+function changeMainImage(index) {
+  // Update thumbnail active state
+  document.querySelectorAll('.thumbnail').forEach((thumb, i) => {
+    thumb.classList.toggle('active', i === index);
+  });
+
+  // In a real implementation, you would change the main image source
+  // For now, we'll just update the active thumbnail
+}
+
+function buyNow(product) {
+  addToCart(product);
+  // In a real implementation, this would redirect to checkout
+  showToast('Đang chuyển đến trang thanh toán...');
+  setTimeout(() => {
+    showToast('Tính năng thanh toán đang được phát triển!');
+  }, 1000);
+}
+
+/* ===== CART MODAL ===== */
+function openCart() {
+  renderCartModal();
+  document.getElementById('cartOverlay').classList.add('show');
+}
+function closeCart() { document.getElementById('cartOverlay').classList.remove('show'); }
+
+function renderCartModal() {
+  const meta = document.getElementById('cartMeta');
+  const items = document.getElementById('cartItems');
+  const summary = document.getElementById('cartSummary');
+  const totalQty = cart.reduce((s,i) => s + i.qty, 0);
+  meta.innerHTML = `Bạn đang có <strong>${totalQty}</strong> sản phẩm`;
+
+  if (cart.length === 0) {
+    items.innerHTML = `<div class="cart-empty-msg"><i class="fa fa-shopping-cart"></i>Giỏ hàng của bạn đang trống.</div>`;
+    summary.innerHTML = '';
+    return;
+  }
+
+  items.innerHTML = cart.map(i => `
+    <div class="cart-item">
+      <div class="cart-item-img">
+        ${i.img ? `<img src="${i.img}" />` : `<i class="fa fa-laptop" style="font-size:32px;color:#ccc;"></i>`}
+      </div>
+      <div>
+        <div class="cart-item-name">${i.name}</div>
+        <div style="font-size:13px;color:#888;margin-bottom:6px;">Thương hiệu: ${i.brand}</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="display:flex;align-items:center;border:1.5px solid #e0e4ef;border-radius:6px;overflow:hidden;">
+            <button onclick="changeQty(${i.id},-1)" style="width:30px;height:30px;background:#f5f7ff;border:none;font-size:16px;cursor:pointer;color:var(--primary);">−</button>
+            <span style="width:36px;text-align:center;font-weight:700;">${i.qty}</span>
+            <button onclick="changeQty(${i.id},1)" style="width:30px;height:30px;background:#f5f7ff;border:none;font-size:16px;cursor:pointer;color:var(--primary);">+</button>
+          </div>
+          <span class="cart-item-price">${formatPrice(i.price)}</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+        <div style="font-size:16px;font-weight:800;color:var(--primary);white-space:nowrap;">${formatPrice(i.price * i.qty)}</div>
+        <button onclick="removeFromCart(${i.id})" style="width:30px;height:30px;border-radius:50%;border:1px solid #e0e4ef;background:none;cursor:pointer;color:#bbb;font-size:14px;" title="Xóa">
+          <i class="fa fa-trash"></i>
+        </button>
+      </div>
+    </div>
+  `).join('');
+
+  const total = cart.reduce((s,i) => s + i.price * i.qty, 0);
+  summary.innerHTML = `
+    <div class="cart-total-row">
+      <span class="label">Tổng tiền:</span>
+      <span class="amount">${formatPrice(total)}</span>
+    </div>
+    <button class="btn-checkout-now" onclick="checkout()">
+      <i class="fa fa-credit-card"></i> Thanh toán ngay
+    </button>
+  `;
+}
+
+function changeQty(id, delta) {
+  const item = cart.find(i => i.id === id);
+  if (!item) return;
+  item.qty += delta;
+  if (item.qty <= 0) removeFromCart(id);
+  else { saveCart(); updateCartBadge(); renderCartModal(); }
+}
+
+function checkout() {
+  showToast('Chức năng thanh toán đang được phát triển!');
+  closeCart();
+}
+
+/* ===== LOGIN MODAL ===== */
+function openLogin() { document.getElementById('loginOverlay').classList.add('show'); }
+function closeLogin() { document.getElementById('loginOverlay').classList.remove('show'); }
+
+function switchTab(tab) {
+  document.getElementById('formLogin').classList.toggle('active', tab === 'login');
+  document.getElementById('formRegister').classList.toggle('active', tab === 'register');
+  document.getElementById('tabLogin').classList.toggle('active', tab === 'login');
+  document.getElementById('tabRegister').classList.toggle('active', tab === 'register');
+}
+
+function fakeLogin() {
+  closeLogin();
+  showToast('Đăng nhập thành công! Chào mừng bạn 👋');
+}
+function fakeRegister() {
+  closeLogin();
+  showToast('Đăng ký thành công! Chào mừng bạn đến Yotsuba-Gear 🎉');
+}
+
+/* ===== TOAST ===== */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+/* ===== CLOSE OVERLAY ON BACKDROP CLICK ===== */
+function closeIfOverlay(e, id) {
+  if (e.target.id === id) {
+    document.getElementById(id).classList.remove('show');
+  }
+}
+
+/* ===== SEARCH ===== */
+function doSearch() {
+  const q = document.getElementById('searchInput').value.trim();
+  if (q) showToast(`Đang tìm kiếm: "${q}"...`);
+}
+document.getElementById('searchInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doSearch();
+});
+
+/* ===== INIT ===== */
+document.addEventListener('DOMContentLoaded', function() {
+  // Get product ID from URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const productId = urlParams.get('id');
+
+  if (productId) {
+    const product = getProductById(productId);
+    renderProductDetail(product);
+  } else {
+    document.getElementById('productDetail').innerHTML = '<p>Không tìm thấy sản phẩm!</p>';
+  }
+
+  updateCartBadge();
+});
+</script>
+
+</body>
+</html>

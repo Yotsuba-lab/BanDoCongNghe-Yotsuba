@@ -1,0 +1,42 @@
+/* ===== BASE.CSS - Reset & Variables ===== */
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --primary: #1a3ecd;
+  --primary-dark: #1230a0;
+  --accent: #8b2be2;
+  --red: #e53935;
+  --yellow: #ffc107;
+  --text-main: #1a1a2e;
+  --text-sub: #555;
+  --text-light: #888;
+  --bg-light: #f3f5f9;
+  --bg-white: #ffffff;
+  --border: #e0e4ef;
+  --shadow: 0 2px 12px rgba(26,62,205,0.08);
+  --radius: 8px;
+  --transition: 0.2s ease;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 14px;
+  color: var(--text-main);
+  background: var(--bg-light);
+  line-height: 1.5;
+}
+
+a { text-decoration: none; color: inherit; }
+ul { list-style: none; }
+img { max-width: 100%; display: block; }
+button { cursor: pointer; border: none; outline: none; font-family: inherit; }
+input { font-family: inherit; outline: none; border: none; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 3px; }
